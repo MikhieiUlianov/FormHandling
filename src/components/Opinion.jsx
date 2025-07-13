@@ -1,4 +1,4 @@
-import { use } from "react";
+import { use, useActionState } from "react";
 import { OpinionsContext } from "../store/opinions-context";
 
 export function Opinion({ opinion: { id, title, body, userName, votes } }) {
@@ -12,13 +12,10 @@ export function Opinion({ opinion: { id, title, body, userName, votes } }) {
     await downvoteOpinion(id);
   }
 
-  //"formAction" it is the same as "onClick"
-  //but now we do not need to access value with e.target.value,
-  //instead we directly get it.
-
-  //"action" is the same as "onSubmit"
-  //but now we do not need to access value with new formData.
-  //instead we directly get it.
+  const [upvoteState, upvoteAction, upvotePending] =
+    useActionState(upvoteAction);
+  const [downvoteState, downvoteAction, downvotePending] =
+    useActionState(downvoteAction);
 
   return (
     <article>
@@ -28,7 +25,10 @@ export function Opinion({ opinion: { id, title, body, userName, votes } }) {
       </header>
       <p>{body}</p>
       <form className="votes">
-        <button formAction={upvoteAction}>
+        <button
+          formAction={upvoteAction}
+          disabled={upvotePending || downvoteAction}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -48,7 +48,10 @@ export function Opinion({ opinion: { id, title, body, userName, votes } }) {
 
         <span>{votes}</span>
 
-        <button formAction={downvoteAction}>
+        <button
+          formAction={downvoteAction}
+          disabled={downvotePending || upvoteAction}
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
