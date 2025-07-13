@@ -4,13 +4,17 @@ import {
   isNotEmpty,
   isEqualToOtherValue,
 } from "../util/validation";
+import { useActionState } from "react";
 
 export default function Signup() {
-  //Get "formData object" instead of "event"
-  //With form actions we dont need to use new "formData()"
-  function signUpAction(formData) {
-    //automaticly call event.preventDefault();
-    //event.preventDefault();
+  //when we use "useActionState" our fucntion is called in a different way,
+  //in this case formData object will be as the second arg.
+  //first arg is the previous state
+
+  //first time it is executed,
+  // our initial state will simply be that initial state,
+  //  which was passed to this hook
+  function signUpAction(prevState, formData) {
     const email = formData.get("email");
     const password = formData.get("password");
     const confirmPassword = formData.get("confirm-password");
@@ -44,11 +48,26 @@ export default function Signup() {
     if (acquisitionChannel.length === 0) {
       errors.push("Select acquisition channel");
     }
-    //automaticly reset the form
+
+    if (errors.length > 0) {
+      return { errors };
+    }
+
+    return { errors: null };
   }
+  //second argument is an initial state,
+  // which will be active while "signUpAction" function will not be executed
+
+  //arg #1 it is state which can change from initial to state which will be returned by "signUpAction"
+  //arg #2 we get an updated form action.
+  // which is wrappin our "signUpAction" function, and does so it can listen it, and provides some exctra futures.
+  //arg #3 pending status, true or false
+  const [formState, formAction /* pending */] = useActionState(signUpAction, {
+    errors: null,
+  });
 
   return (
-    <form action={signUpAction}>
+    <form action={formAction}>
       <h2>Welcome on board!</h2>
       <p>We just need a little bit of data from you to get you started 🚀</p>
 
@@ -132,6 +151,13 @@ export default function Signup() {
           agree to the terms and conditions
         </label>
       </div>
+      {formState.errors && (
+        <ul className="error">
+          {formState.errors.map((error) => (
+            <li key={error}>{error}</li>
+          ))}
+        </ul>
+      )}
 
       <p className="form-actions">
         <button type="reset" className="button button-flat">
