@@ -1,6 +1,17 @@
 export default function Signup() {
+  //Get "formData object" instead of "event"
+  //With form actions we dont need to use new "formData()"
+  function signUpAction(formData) {
+    //automaticly call event.preventDefault();
+    //event.preventDefault();
+    const enteredEmail = formData.get("email");
+
+    const data = Object.fromEntries(formData);
+    //automaticly reset the form
+  }
+
   return (
-    <form>
+    <form action={signUpAction}>
       <h2>Welcome on board!</h2>
       <p>We just need a little bit of data from you to get you started 🚀</p>
 
