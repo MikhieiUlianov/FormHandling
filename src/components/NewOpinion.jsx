@@ -1,7 +1,10 @@
-import { useActionState } from "react";
+import { useActionState, use } from "react";
+import { OpinionsContext } from "../store/opinions-context";
 
 export function NewOpinion() {
-  function shareOpinionAction(prevState, formData) {
+  const { addOpinion } = use(OpinionsContext);
+
+  async function shareOpinionAction(prevState, formData) {
     let errors = [];
 
     const title = formData.get("title");
@@ -23,7 +26,7 @@ export function NewOpinion() {
           body,
         },
       };
-
+    await addOpinion({ title, body, userName });
     return { errors: null };
   }
 
