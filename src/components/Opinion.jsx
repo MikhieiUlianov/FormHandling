@@ -1,20 +1,41 @@
-import { use, useActionState } from "react";
+import { use, useActionState, useOptimistic } from "react";
+
 import { OpinionsContext } from "../store/opinions-context";
 
 export function Opinion({ opinion: { id, title, body, userName, votes } }) {
   const { upvoteOpinion, downvoteOpinion } = use(OpinionsContext);
 
+  //arg #1 the state which must be updated optimisticly
+  //arg #2 the function which will be invoked be react, but at the point of time it is defined by you.
+  //this second arg accept previous state as a first arg, and other args are our own.
+
+  //this hook return state, which we passed as a first arg to this hook,
+  //  and the function which will be trigger our second arg
+
+  const [optimisticVotes, setVotesOptimistically] = useOptimistic(
+    votes,
+    //every args passed to "setVotesOptimistically" will be passed automatically
+    (prevVotes, mode) => (mode === "up" ? prevVotes + 1 : prevVotes - 1)
+  );
+
+  //"setVotesOptimistically" can be called in any "formAction"
+  //because it is temporarily state,
+  //which is shown on the UI whiles the form,
+  //the invoked of this optimistic function, is beeing submited
+
   async function upvoteAction() {
+    setVotesOptimistically("up");
     await upvoteOpinion(id);
   }
 
   async function downvoteAction() {
+    setVotesOptimistically("down");
     await downvoteOpinion(id);
   }
 
-  const [upvoteState, upvoteAction, upvotePending] =
+  const [upvoteFormState, upvoteFormAction, upvotePending] =
     useActionState(upvoteAction);
-  const [downvoteState, downvoteAction, downvotePending] =
+  const [downvoteFormState, downvoteFormAction, downvotePending] =
     useActionState(downvoteAction);
 
   return (
@@ -26,8 +47,8 @@ export function Opinion({ opinion: { id, title, body, userName, votes } }) {
       <p>{body}</p>
       <form className="votes">
         <button
-          formAction={upvoteAction}
-          disabled={upvotePending || downvoteAction}
+          formAction={upvoteFormAction}
+          disabled={upvotePending || downvotePending}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -46,11 +67,11 @@ export function Opinion({ opinion: { id, title, body, userName, votes } }) {
           </svg>
         </button>
 
-        <span>{votes}</span>
+        <span>{optimisticVotes}</span>
 
         <button
-          formAction={downvoteAction}
-          disabled={downvotePending || upvoteAction}
+          formAction={downvoteFormAction}
+          disabled={upvotePending || downvotePending}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
