@@ -1,12 +1,49 @@
+import {
+  isEmail,
+  hasMinLength,
+  isNotEmpty,
+  isEqualToOtherValue,
+} from "../util/validation";
+
 export default function Signup() {
   //Get "formData object" instead of "event"
   //With form actions we dont need to use new "formData()"
   function signUpAction(formData) {
     //automaticly call event.preventDefault();
     //event.preventDefault();
-    const enteredEmail = formData.get("email");
+    const email = formData.get("email");
+    const password = formData.get("password");
+    const confirmPassword = formData.get("confirm-password");
+    const firstName = formData.get("first-name");
+    const lastName = formData.get("last-name");
+    const role = formData.get("role");
+    const terms = formData.get("terms");
+    const acquisitionChannel = formData.getAll("acquisition");
+    let errors = [];
 
-    const data = Object.fromEntries(formData);
+    if (!isEmail(email)) {
+      errors.push("invalid email address");
+    }
+    if (!isNotEmpty(password) || !hasMinLength(password, 6)) {
+      errors.push("Invalid password");
+    }
+
+    if (!isEqualToOtherValue(password, confirmPassword)) {
+      errors.push("Passwords do not match");
+    }
+    if (!isNotEmpty(firstName) || !isNotEmpty(lastName)) {
+      errors.push("Provide both your first and last name");
+    }
+
+    if (!isNotEmpty(role)) {
+      errors.push("Select role");
+    }
+    if (!terms) {
+      errors.push("You must agree with our conditions");
+    }
+    if (acquisitionChannel.length === 0) {
+      errors.push("Select acquisition channel");
+    }
     //automaticly reset the form
   }
 
